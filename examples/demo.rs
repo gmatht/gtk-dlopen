@@ -3,6 +3,13 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Simple CLI option: set --prefer-gtk3 to prefer GTK3 when both GTK4 and GTK3
+    // are available. This sets an environment variable that Loader::new observes.
+    let args: Vec<String> = std::env::args().collect();
+    if args.iter().any(|a| a == "--prefer-gtk3" || a == "-3") {
+        std::env::set_var("GTK_COMPAT_PREFER_GTK3", "1");
+    }
+
     let loader = Loader::new()?;
     println!("Loaded GTK version: {:?}", loader.version());
 

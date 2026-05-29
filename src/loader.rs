@@ -59,8 +59,17 @@ impl Loader {
             std::env::set_var("GDK_PIXBUF_USE_SHM", "0");
         }
 
-        // Try GTK4 then GTK3
-        let (libgtk, version) = if let Some(l) = open_first(&gtk4_cands) { (l, Version::Gtk4) } else if let Some(l) = open_first(&gtk3_cands) { (l, Version::Gtk3) } else { return Err(Error::NoGtkFound); };
+        // Try GTK4 then GTK3 by default. Honor GTK_COMPAT_PREFER_GTK3=1 to reverse.
+        let prefer_gtk3 = match std::env::var_os("GTK_COMPAT_PREFER_GTK3") {
+            Some(v) => v != "0",
+            None => false,
+        };
+
+        let (libgtk, version) = if prefer_gtk3 {
+            if let Some(l) = open_first(&gtk3_cands) { (l, Version::Gtk3) } else if let Some(l) = open_first(&gtk4_cands) { (l, Version::Gtk4) } else { return Err(Error::NoGtkFound); }
+        } else {
+            if let Some(l) = open_first(&gtk4_cands) { (l, Version::Gtk4) } else if let Some(l) = open_first(&gtk3_cands) { (l, Version::Gtk3) } else { return Err(Error::NoGtkFound); }
+        };
         libs.insert("libgtk".into(), Arc::new(libgtk));
 
         // Resolve symbols
