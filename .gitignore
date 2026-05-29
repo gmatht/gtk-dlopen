@@ -1,0 +1,10 @@
+.cargo/
+target/
+**/*.rs.bk
+**/*~
+*.swp
+*.so
+*.dSYM/
+*.dll
+*.exe
+dist/
