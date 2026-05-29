@@ -82,8 +82,10 @@ impl Window {
     }
 
     pub fn present(&self) {
+        // Ensure children are shown first (GTK3 needs gtk_widget_show_all in many cases),
+        // then present the window if possible.
+        if let Some(show_all) = self.loader.symbols.gtk_widget_show_all { unsafe { show_all(self.inner); } }
         if let Some(present) = self.loader.symbols.gtk_window_present { unsafe { present(self.inner); return; } }
-        if let Some(show_all) = self.loader.symbols.gtk_widget_show_all { unsafe { show_all(self.inner); return; } }
     }
 }
 
